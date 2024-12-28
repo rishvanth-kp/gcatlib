@@ -25,4 +25,7 @@ pkginclude_HEADERS = AlignedGenomicFeature.hpp \
                      GtfReader.hpp \
                      PreprocessGff.hpp \
                      SamEntry.hpp \
-                     SamReader.hpp
+                     SamReader.hpp \
+                     FeatureVector.hpp \
+                     GenomicStepVector.hpp \
+                     StepVector.hpp
