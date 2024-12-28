@@ -31,34 +31,26 @@
 *.out
 *.app
 
-rna_seq_qc
-alignment_quality_distribution
-alignment_length_distribution
-alignment_gc_distribution
-alignment_depth
-mismatch_profile
-mismatch_profile_vaf
-mismatch_jaccard
-coverage_test
-genomic_feature_count
-gene_count
-add_barcode_to_fastq_name
-barcode_count
-bc_in_region
-bc_tss_matrix
-bc_feature_matrix
-bc_frag_dist
-genome_stats
-tss_enrichment
-sc_rnaseq_feature_matrix
-get_clipped_bases
-nametag_to_samtag
-bc_mismatch_matrix
-get_reference_base
-bc_coverage
-bc_flagstat
-bc_fragment_coverage
-pseudobulk_fragment_coverage
+# Automake related files
+Makefile
+Makefile.in
+aclocal.m4
+ar-lib
+autom4te.cache/
+compile
+config.h
+config.h.in
+config.log
+config.status
+configure
+configure~
+depcomp
+install-sh
+missing
+src/.deps/
+src/Makefile
+src/Makefile.in
+stamp-h1
 
 # vim temp files
 *.swp
