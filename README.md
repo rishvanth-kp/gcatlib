@@ -1,5 +1,6 @@
-# genomic_utils
-A library for building sequence analysis tools.
+# gcatlib
+Gene and chromosome analysis toolkit. A library for building tools
+for genome analysis. 
 
 ## Copyright and License Information
 Copyright (C) 2022 Rishvanth Prabakar
