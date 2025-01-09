@@ -11,7 +11,8 @@ libgcat_a_SOURCES = AlignedGenomicFeature.cpp \
                     GtfReader.cpp \
                     PreprocessGff.cpp \
                     SamEntry.cpp \
-                    SamReader.cpp
+                    SamReader.cpp \
+                    Metagene.cpp
 
 
 pkginclude_HEADERS = AlignedGenomicFeature.hpp \
@@ -28,4 +29,5 @@ pkginclude_HEADERS = AlignedGenomicFeature.hpp \
                      SamReader.hpp \
                      FeatureVector.hpp \
                      GenomicStepVector.hpp \
-                     StepVector.hpp
+                     StepVector.hpp \
+                     Metagene.hpp
