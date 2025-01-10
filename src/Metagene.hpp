@@ -23,19 +23,42 @@
 #include <iostream>
 #include <string>
 
-#include <BedReader.hpp>
-#include <GenomicRegion.hpp>
-#include <FeatureVector.hpp>
-#include <GenomicStepVector.hpp>
+#include "GenomicRegion.hpp"
+#include "FeatureVector.hpp"
+#include "GenomicStepVector.hpp"
 
 
 class Metagene {
 
 public:
-  Metagene(const std::string& bed_file);
+  Metagene(const std::string& bed_file, const size_t divisions = 100);
+  // Metagene(const std::string& bed_file) : Metagene(bed_file, 100) {};
   ~Metagene();
 
+
+  void at(const GenomicRegion g) const;
+
 private:
+  GenomicStepVector<FeatureVector<pair<string, size_t>>> metagene;
+  
+  size_t n_features;
+  size_t n_divisions;
+  
+  
+  struct FeatureRegions {
+    string chrom;
+    size_t start;
+    size_t end;
+    string name;
+    bool dir; // 1: pos, 0:neg 
+  }; 
+
+  void process_feature(const vector<FeatureRegions>& feature);
+  void add_features(const string& bed_file);
+  void add_region(const GenomicRegion& g, const vector<string>& fields, 
+           vector<FeatureRegions>& feature);
+
+
 };
 
 # endif
