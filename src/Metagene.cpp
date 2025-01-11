@@ -17,6 +17,7 @@
 * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
+#include <unordered_map>
 #include <fstream>
 #include <cmath>
 
@@ -25,7 +26,7 @@
 
 using std::string;
 using std::vector;
-
+using std::unordered_map;
 
 
 void
@@ -48,19 +49,19 @@ void
 Metagene::process_feature(const vector<FeatureRegions>& feature) {
 
   size_t feature_size = 0;
-  cout << "Number of regions: " << feature.size() << endl;
+  // cout << "Number of regions: " << feature.size() << endl;
   for (size_t i = 0; i < feature.size(); ++i) {
-    cout << feature[i].chrom << "\t" 
-         << feature[i].start << "\t" << feature[i].end << "\t"
-         << feature[i].name << "\t" << feature[i].dir << endl;
+    // cout << feature[i].chrom << "\t" 
+    //      << feature[i].start << "\t" << feature[i].end << "\t"
+    //      << feature[i].name << "\t" << feature[i].dir << endl;
 
     feature_size += (feature[i].end - feature[i].start);
   }
   
-  cout << "feature size: " << feature_size << endl;
+  // cout << "feature size: " << feature_size << endl;
   float base_pct = static_cast<float>(n_divisions) / 
                     static_cast<float>(feature_size);
-  cout << "base_size: " << base_pct << endl;
+  // cout << "base_size: " << base_pct << endl;
 
   float base_counter = 0;
   if (!feature[0].dir)
@@ -72,7 +73,8 @@ Metagene::process_feature(const vector<FeatureRegions>& feature) {
       metagene.add(feature[i].chrom, j, j + 1,
         FeatureVector<pair<string, size_t>>
         (make_pair(feature[i].name, static_cast<size_t>(round(base_counter)) )) );
-      cout << j << "\t" << base_counter << "\t" << static_cast<size_t>(round(base_counter)) << endl;
+      // cout << j << "\t" << base_counter << "\t" 
+      //      << static_cast<size_t>(round(base_counter)) << endl;
       if (feature[i].dir) {
         base_counter += base_pct;
       }
@@ -83,7 +85,8 @@ Metagene::process_feature(const vector<FeatureRegions>& feature) {
     metagene.add(feature[i].chrom, feature[i].end, feature[i].end + 1,
       FeatureVector<pair<string, size_t>>
       (make_pair(feature[i].name, static_cast<size_t>(round(base_counter)) )) );
-    cout << feature[i].end << "\t" << base_counter << "\t" << static_cast<size_t>(round(base_counter)) << endl;
+    // cout << feature[i].end << "\t" << base_counter << "\t" 
+    //      << static_cast<size_t>(round(base_counter)) << endl;
   } 
 
 }
@@ -93,7 +96,6 @@ Metagene::add_features(const string& bed_file) {
   BedReader reader(bed_file);
   GenomicRegion g;
   vector<string> fields;
-  cout << bed_file << endl;
  
   vector<FeatureRegions> feature;
   reader.read_bed_line(g, fields);
@@ -122,7 +124,6 @@ Metagene::add_features(const string& bed_file) {
 
 Metagene::Metagene(const string& bed_file, const size_t divisions) {
   
-  cout << "Metagene construct" << endl; 
   n_features = 0;
   n_divisions = divisions;
   add_features(bed_file);
@@ -135,6 +136,53 @@ Metagene::~Metagene() {
 
 
 void 
-Metagene::at(const GenomicRegion g) const {
+Metagene::at(const GenomicRegion &in, 
+             vector<string> &feature, 
+             vector<size_t> &first, vector<size_t> &last) const {
 
+  feature.clear();
+  first.clear();
+  last.clear();
+
+  unordered_map<string, size_t> regions;  
+  size_t regions_counter = 0;
+
+  // cout  << "querying " << in << endl;
+
+  vector<pair<GenomicRegion, FeatureVector<pair<string, size_t>>>> 
+    feature_out;
+  metagene.at(in, feature_out, true);
+
+  for(size_t i = 0; i < feature_out.size(); ++i) {
+    // cout << feature_out[i].first << "\t";
+    for (size_t j = 0; j < feature_out[i].second.size(); ++j) {
+      // cout << feature_out[i].second.at(j).first << "\t";
+      // cout << feature_out[i].second.at(j).second << "\t";
+
+      unordered_map<string, size_t>::const_iterator it;
+      it = regions.find(feature_out[i].second.at(j).first);
+      // check if it is a new region
+      if (it == regions.end()) {
+        // keep track of region
+        regions[feature_out[i].second.at(j).first] = regions_counter++;
+        // add the region to output
+        feature.push_back(feature_out[i].second.at(j).first);
+        first.push_back(feature_out[i].second.at(j).second);
+        last.push_back(feature_out[i].second.at(j).second);
+      }
+      // if the region already exists just upate the min and max 
+      else {
+        // update the min and the max
+        // (only one will be updated depending on the direction). 
+        if (feature_out[i].second.at(j).second < first[it->second]) {
+          first[it->second] = feature_out[i].second.at(j).second;
+        }
+        if (feature_out[i].second.at(j).second > last[it->second]) {
+          last[it->second] = feature_out[i].second.at(j).second;
+        }
+
+      }
+    }
+    // cout << endl;
+  }
 }

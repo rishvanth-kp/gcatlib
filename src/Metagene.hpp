@@ -31,12 +31,14 @@
 class Metagene {
 
 public:
-  Metagene(const std::string& bed_file, const size_t divisions = 100);
+  Metagene(const std::string &bed_file, const size_t divisions = 100);
   // Metagene(const std::string& bed_file) : Metagene(bed_file, 100) {};
   ~Metagene();
 
 
-  void at(const GenomicRegion g) const;
+  void at(const GenomicRegion &in,
+          vector<string> &feature, 
+          vector<size_t> &first, vector<size_t> &last) const;
 
 private:
   GenomicStepVector<FeatureVector<pair<string, size_t>>> metagene;
@@ -53,10 +55,10 @@ private:
     bool dir; // 1: pos, 0:neg 
   }; 
 
-  void process_feature(const vector<FeatureRegions>& feature);
-  void add_features(const string& bed_file);
-  void add_region(const GenomicRegion& g, const vector<string>& fields, 
-           vector<FeatureRegions>& feature);
+  void process_feature(const vector<FeatureRegions> &feature);
+  void add_features(const string &bed_file);
+  void add_region(const GenomicRegion& g, const vector<string> &fields, 
+           vector<FeatureRegions> &feature);
 
 
 };
