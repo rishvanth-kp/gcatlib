@@ -48,6 +48,9 @@ Metagene::add_region(const GenomicRegion& g, const vector<string>& fields,
 void
 Metagene::process_feature(const vector<FeatureRegions>& feature) {
 
+  // keep track of feature name
+  feature_names.push_back(feature[0].name);
+
   size_t feature_size = 0;
   // cout << "Number of regions: " << feature.size() << endl;
   for (size_t i = 0; i < feature.size(); ++i) {
@@ -107,7 +110,7 @@ Metagene::add_features(const string& bed_file) {
     // if it does, process the previous feature
     if (feature.back().name != fields[0]) {
       process_feature(feature);
-      ++n_features;    
+      ++n_features;   
       // get rid of the old feature
       feature.clear();
     }
@@ -133,6 +136,17 @@ Metagene::~Metagene() {
 
 }
 
+size_t 
+Metagene::get_n_features() const {
+  return n_features;
+}
+  
+
+void 
+Metagene::get_feature_names(vector<string> &names) const {
+  names.clear();
+  names = feature_names;
+}
 
 
 void 

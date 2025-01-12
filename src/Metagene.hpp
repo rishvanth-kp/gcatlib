@@ -22,6 +22,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include "GenomicRegion.hpp"
 #include "FeatureVector.hpp"
@@ -40,12 +41,15 @@ public:
           vector<string> &feature, 
           vector<size_t> &first, vector<size_t> &last) const;
 
+  size_t get_n_features() const;
+  void get_feature_names(vector<string> &names) const;
+
 private:
   GenomicStepVector<FeatureVector<pair<string, size_t>>> metagene;
   
   size_t n_features;
   size_t n_divisions;
-  
+  vector<string> feature_names; 
   
   struct FeatureRegions {
     string chrom;
