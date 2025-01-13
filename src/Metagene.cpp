@@ -69,27 +69,53 @@ Metagene::process_feature(const vector<FeatureRegions>& feature) {
   float base_counter = 0;
   if (!feature[0].dir)
     base_counter = 100;
-    
+ 
+   
 
   for (size_t i = 0; i < feature.size(); ++i) {
+    size_t prev_counter = static_cast<size_t>(round(base_counter));
+    size_t prev_start = feature[i].start;
     for (size_t j = feature[i].start; j < feature[i].end; ++j) {
+
+      /*
       metagene.add(feature[i].chrom, j, j + 1,
         FeatureVector<pair<string, size_t>>
         (make_pair(feature[i].name, static_cast<size_t>(round(base_counter)) )) );
-      // cout << j << "\t" << base_counter << "\t" 
-      //      << static_cast<size_t>(round(base_counter)) << endl;
+      cout << j << "\t" << base_counter << "\t" 
+           << static_cast<size_t>(round(base_counter)) << endl;
+      */
+
       if (feature[i].dir) {
         base_counter += base_pct;
       }
       else {
         base_counter -= base_pct;
       }
-    }    
+      
+      size_t curr_counter = static_cast<size_t>(round(base_counter));
+      if (curr_counter != prev_counter) {
+        metagene.add(feature[i].chrom, prev_start, j + 1,
+          FeatureVector<pair<string, size_t>>
+          (make_pair(feature[i].name, prev_counter )) );
+        // cout << "Adding: " << prev_start << " " << j + 1 << " " 
+        //      << prev_counter << endl;
+        prev_counter = curr_counter;
+        prev_start = j + 1;
+      }
+
+    }   
+    /* 
     metagene.add(feature[i].chrom, feature[i].end, feature[i].end + 1,
       FeatureVector<pair<string, size_t>>
       (make_pair(feature[i].name, static_cast<size_t>(round(base_counter)) )) );
-    // cout << feature[i].end << "\t" << base_counter << "\t" 
-    //      << static_cast<size_t>(round(base_counter)) << endl;
+    cout << feature[i].end << "\t" << base_counter << "\t" 
+         << static_cast<size_t>(round(base_counter)) << endl;
+    */
+    metagene.add(feature[i].chrom, prev_start, feature[i].end + 1,
+      FeatureVector<pair<string, size_t>>
+      (make_pair(feature[i].name, prev_counter )) );    
+    // cout << "Adding: " << prev_start << " " << feature[i].end + 1 
+    //        << " " << prev_counter << endl;
   } 
 
 }
