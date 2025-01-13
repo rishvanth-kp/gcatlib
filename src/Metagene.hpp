@@ -1,5 +1,5 @@
 /*
-* Metagene: Determine the normazlied gene locations for metagene plots 
+* Metagene: Determine the normazlied gene locations for metagene plots
 * Copyright (C) 2025 Rishvanth Prabakar
 *
 * This program is free software; you can redistribute it and/or modify
@@ -38,7 +38,7 @@ public:
 
 
   void at(const GenomicRegion &in,
-          vector<string> &feature, 
+          vector<string> &feature,
           vector<size_t> &first, vector<size_t> &last) const;
 
   size_t get_n_features() const;
@@ -46,22 +46,22 @@ public:
 
 private:
   GenomicStepVector<FeatureVector<pair<string, size_t>>> metagene;
-  
+
   size_t n_features;
   size_t n_divisions;
-  vector<string> feature_names; 
-  
+  vector<string> feature_names;
+
   struct FeatureRegions {
     string chrom;
     size_t start;
     size_t end;
     string name;
-    bool dir; // 1: pos, 0:neg 
-  }; 
+    bool dir; // 1: pos, 0:neg
+  };
 
   void process_feature(const vector<FeatureRegions> &feature);
   void add_features(const string &bed_file);
-  void add_region(const GenomicRegion& g, const vector<string> &fields, 
+  void add_region(const GenomicRegion& g, const vector<string> &fields,
            vector<FeatureRegions> &feature);
 
 
