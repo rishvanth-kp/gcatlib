@@ -38,8 +38,11 @@ public:
 
 
   void at(const GenomicRegion &in,
-          vector<string> &feature,
-          vector<size_t> &first, vector<size_t> &last) const;
+          vector<pair<GenomicRegion,
+                      FeatureVector<pair<string, size_t>>>> &out) const;
+  void at_ends(const GenomicRegion &in,
+               vector<string> &feature,
+               vector<size_t> &first, vector<size_t> &last) const;
 
   size_t get_n_features() const;
   void get_feature_names(vector<string> &names) const;

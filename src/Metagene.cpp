@@ -67,55 +67,87 @@ Metagene::process_feature(const vector<FeatureRegions>& feature) {
   // cout << "base_size: " << base_pct << endl;
 
   double base_counter = 0;
-  if (!feature[0].dir)
-    base_counter = 100;
 
 
 
   for (size_t i = 0; i < feature.size(); ++i) {
-    size_t prev_counter = static_cast<size_t>(round(base_counter));
+    size_t prev_counter = static_cast<size_t>(floor(base_counter));
     size_t prev_start = feature[i].start;
     for (size_t j = feature[i].start; j < feature[i].end; ++j) {
 
       /*
       metagene.add(feature[i].chrom, j, j + 1,
         FeatureVector<pair<string, size_t>>
-        (make_pair(feature[i].name, static_cast<size_t>(round(base_counter)) )) );
+        (make_pair(feature[i].name, static_cast<size_t>(floor(base_counter)) )) );
       cout << j << "\t" << base_counter << "\t"
-           << static_cast<size_t>(round(base_counter)) << endl;
+           << static_cast<size_t>(floor(base_counter)) << endl;
       */
+      // cout << j << "\t" << base_counter << "\t"
+      //      << static_cast<size_t>(floor(base_counter)) << endl;
 
-      if (feature[i].dir) {
-        base_counter += base_pct;
-      }
-      else {
-        base_counter -= base_pct;
+      size_t curr_counter = static_cast<size_t>(floor(base_counter));
+      if (curr_counter != prev_counter) {
+        if (feature[i].dir) {
+          metagene.add(feature[i].chrom, prev_start, j,
+            FeatureVector<pair<string, size_t>>
+            (make_pair(feature[i].name, prev_counter )) );
+          // cout << "Adding: " << prev_start << " " << j << " "
+          //      << prev_counter << endl;
+        }
+        else {
+          metagene.add(feature[i].chrom, prev_start, j,
+            FeatureVector<pair<string, size_t>>
+            (make_pair(feature[i].name, n_divisions - prev_counter - 1)) );
+          // cout << "Adding: " << prev_start << " " << j << " "
+          //      << n_divisions - prev_counter - 1 << endl;
+
+        }
+
+        prev_counter = curr_counter;
+        prev_start = j;
       }
 
-      size_t curr_counter = static_cast<size_t>(round(base_counter));
+      base_counter += base_pct;
+
+/*
+      size_t curr_counter = static_cast<size_t>(floor(base_counter));
       if (curr_counter != prev_counter) {
         metagene.add(feature[i].chrom, prev_start, j + 1,
           FeatureVector<pair<string, size_t>>
           (make_pair(feature[i].name, prev_counter )) );
-        // cout << "Adding: " << prev_start << " " << j + 1 << " "
-        //      << prev_counter << endl;
+        cout << "Adding: " << prev_start << " " << j + 1 << " "
+             << prev_counter << endl;
         prev_counter = curr_counter;
         prev_start = j + 1;
       }
+*/
 
     }
     /*
     metagene.add(feature[i].chrom, feature[i].end, feature[i].end + 1,
       FeatureVector<pair<string, size_t>>
-      (make_pair(feature[i].name, static_cast<size_t>(round(base_counter)) )) );
+      (make_pair(feature[i].name, static_cast<size_t>(floor(base_counter)) )) );
     cout << feature[i].end << "\t" << base_counter << "\t"
-         << static_cast<size_t>(round(base_counter)) << endl;
+         << static_cast<size_t>(floor(base_counter)) << endl;
     */
-    metagene.add(feature[i].chrom, prev_start, feature[i].end + 1,
-      FeatureVector<pair<string, size_t>>
-      (make_pair(feature[i].name, prev_counter )) );
-    // cout << "Adding: " << prev_start << " " << feature[i].end + 1
-    //      << " " << prev_counter << endl;
+    // cout << feature[i].end << "\t" << base_counter << "\t"
+    //      << static_cast<size_t>(floor(base_counter)) << endl;
+
+    if (feature[i].dir) {
+      metagene.add(feature[i].chrom, prev_start, feature[i].end,
+        FeatureVector<pair<string, size_t>>
+        (make_pair(feature[i].name, prev_counter )) );
+      // cout << "Adding e: " << prev_start << " " << feature[i].end
+      //      << " " << prev_counter << endl;
+    }
+    else {
+      metagene.add(feature[i].chrom, prev_start, feature[i].end,
+        FeatureVector<pair<string, size_t>>
+        (make_pair(feature[i].name, n_divisions - prev_counter - 1 )) );
+      // cout << "Adding e: " << prev_start << " " << feature[i].end
+      //      << " " << n_divisions - prev_counter - 1 << endl;
+
+    }
   }
 
 }
@@ -177,8 +209,15 @@ Metagene::get_feature_names(vector<string> &names) const {
 
 void
 Metagene::at(const GenomicRegion &in,
-             vector<string> &feature,
-             vector<size_t> &first, vector<size_t> &last) const {
+             vector<pair<GenomicRegion,
+                         FeatureVector<pair<string, size_t>>>> &out) const {
+  metagene.at(in, out);
+}
+
+void
+Metagene::at_ends(const GenomicRegion &in,
+                  vector<string> &feature,
+                  vector<size_t> &first, vector<size_t> &last) const {
 
   feature.clear();
   first.clear();
@@ -191,7 +230,7 @@ Metagene::at(const GenomicRegion &in,
 
   vector<pair<GenomicRegion, FeatureVector<pair<string, size_t>>>>
     feature_out;
-  metagene.at(in, feature_out, true);
+  metagene.at(in, feature_out);
 
   for (size_t i = 0; i < feature_out.size(); ++i) {
     // cout << feature_out[i].first << "\t";
