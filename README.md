@@ -59,7 +59,7 @@ make [-j threads]
 This will generate the libraries into the `build` directory.
 
 
-Finally (optionally), install gcatlib with:
+Finally, install gcatlib with:
 ```
 make intall
 ```
