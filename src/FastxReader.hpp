@@ -28,6 +28,13 @@
 #include "htslib/sam.h"
 
 
+
+struct FastxEntry {
+  std::string name;
+  std::string seq;
+  std::string qual;
+};
+
 /**
 * \brief FASTQ/FASTA file reader.
 * 
@@ -49,10 +56,17 @@ public:
   */
   ~FastxReader();
 
+  bool read_fastx_entry(FastxEntry &e);
+ 
+  void set_2nd_name_column();
+ 
 private:
   htsFile *hts;
   sam_hdr_t *header;
-  bam1_t *fastx_entry;
+  bam1_t *fastx_data;
+  kstring_t fastx_kstr; 
+ 
+  bool is_fasta;
 };
 
 

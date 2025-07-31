@@ -18,6 +18,7 @@
 */
 
 #include "FastxReader.hpp"
+#include <sstream>
 
 using std::cout;
 using std::cerr;
@@ -31,13 +32,52 @@ FastxReader::FastxReader(const string &in_file) {
     throw std::runtime_error("Cannot open FASTX file: " + in_file);
  
   // check format
+  if (hts_get_format(hts)->format == fasta_format)
+    is_fasta = true;
+  else if (hts_get_format(hts)->format == fastq_format)
+    is_fasta = false;
+  else
+    throw std::runtime_error("Invalid FASTX file format: " + in_file);
 
   // need to read header even for a fastx file
+  if (!(header = sam_hdr_read(hts)))
+    throw std::runtime_error("No header in FASTX file!: " + in_file);
 
   // initialize data structure for reading 
-   
+  if (!(fastx_data = bam_init1())) 
+    throw std::runtime_error("Failed to initialize fastx data");  
+
+  // initialize the kstring
+  ks_initialize(&fastx_kstr);  
+
 }
 
 FastxReader::~FastxReader() {
   hts_close(hts);
+  sam_hdr_destroy(header);
+  bam_destroy1(fastx_data);
+  ks_free(&fastx_kstr);
+}
+
+void 
+FastxReader::set_2nd_name_column() {
+  hts_set_opt(hts, FASTQ_OPT_NAME2); 
+}
+
+bool
+FastxReader::read_fastx_entry(FastxEntry &e) {
+  
+  if (sam_read1(hts, header, fastx_data) >= 0) {
+    if (sam_format1(header, fastx_data, &fastx_kstr) >= 0) {
+      std::istringstream iss(fastx_kstr.s);
+      string dummy;
+      iss >> e.name >> dummy >> dummy >> dummy >> dummy
+          >> dummy >> dummy >> dummy >> dummy >> e.seq >> e.qual;
+      cout << e.name << endl;
+      cout << e.seq << endl;
+      cout << e.qual << endl;
+      return true;
+    }
+  }
+  return false;
 }
