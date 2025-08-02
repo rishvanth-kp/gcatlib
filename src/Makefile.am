@@ -1,6 +1,6 @@
 lib_LIBRARIES = libgcat.a
 
-AM_CPPFLAGS = -O2 -Wall -std=c++11
+AM_CXXFLAGS = -O2 -Wall -std=c++11
 
 libgcat_a_SOURCES = AlignedGenomicFeature.cpp \
                     AlignedOverlapGenomicFeature.cpp \
