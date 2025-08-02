@@ -34,10 +34,13 @@ public:
 
   ~FastxWriter();
 
+  bool write_fastx_entry(FastxEntry &e);
+
   
 
 private:
-
+  htsFile *hts;
+  bam1_t *fastx_data;
 };  
 
 #endif

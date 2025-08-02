@@ -38,4 +38,4 @@ pkginclude_HEADERS = AlignedGenomicFeature.hpp \
                      Metagene.hpp \
                      FastxReader.hpp \
                      FastxWriter.hpp \
-                     FastxEntry.cpp
+                     FastxEntry.hpp
