@@ -27,13 +27,7 @@
 #include "htslib/hts.h"
 #include "htslib/sam.h"
 
-
-
-struct FastxEntry {
-  std::string name;
-  std::string seq;
-  std::string qual;
-};
+#include "FastxEntry.hpp"
 
 /**
 * \brief FASTQ/FASTA file reader.

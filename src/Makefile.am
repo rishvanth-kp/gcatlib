@@ -15,7 +15,8 @@ libgcat_a_SOURCES = AlignedGenomicFeature.cpp \
                     SamEntry.cpp \
                     SamReader.cpp \
                     Metagene.cpp \
-                    FastxReader.cpp
+                    FastxReader.cpp \
+                    FastxEntry.cpp
 
 
 pkginclude_HEADERS = AlignedGenomicFeature.hpp \
@@ -34,4 +35,5 @@ pkginclude_HEADERS = AlignedGenomicFeature.hpp \
                      GenomicStepVector.hpp \
                      StepVector.hpp \
                      Metagene.hpp \
-                     FastxReader.hpp
+                     FastxReader.hpp \
+                     FastxEntry.cpp
