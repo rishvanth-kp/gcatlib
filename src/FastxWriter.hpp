@@ -1,5 +1,5 @@
 /*
-* FastxReader: class to read fastq/a files
+* FastxWriter: class to write fastq/a files
 * Copyright (C) 2025 Rishvanth Prabakar
 *
 * This program is free software; you can redistribute it and/or modify
@@ -17,50 +17,27 @@
 * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#ifndef FASTX_READER_HPP
-#define FASTX_READER_HPP
+#ifndef FASTX_WRITER_HPP
+#define FASTX_WRITER_HPP
 
-#include <iostream>
 #include <string>
 
 #include "htslib/hts.h"
 #include "htslib/sam.h"
 
-#include "FastxEntry.hpp"
+#include "FastxEntry.hpp" 
 
-/**
-* \brief FASTQ/FASTA file reader.
-* 
-* Used htslib to read FASTX entries. This class reads the entries
-* and parses them into a FastxEntry. 
-*
-*/
-class FastxReader {
+class FastxWriter {
 public:
-  /**
-  * Open a fastx file, verifies that it is in the right format,
-  * and initialized the htslib handlers.
-  * 
-  * @param [in] in_file FASTQ/FASTA (compressed) file name. 
-  */
-  FastxReader(const std::string &in_file);
-  /**
-  * Closes the file and destroys htslib handlers.
-  */
-  ~FastxReader();
 
-  bool read_fastx_entry(FastxEntry &e);
- 
-  void set_2nd_name_column();
- 
+  FastxWriter(const std::string &out_file);
+
+  ~FastxWriter();
+
+  
+
 private:
-  htsFile *hts;
-  sam_hdr_t *header;
-  bam1_t *fastx_data;
-  kstring_t fastx_kstr; 
- 
-  bool is_fasta;
-};
 
+};  
 
 #endif
