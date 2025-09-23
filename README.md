@@ -14,6 +14,9 @@ The documentation for gcatlib will be made available soon.
 following the procedure under 'Basic Installation' described
 [here](https://github.com/samtools/htslib/blob/develop/INSTALL)
 
+`gcatlib` can be downloaded [here](
+https://github.com/rishvanth-kp/gcatlib/releases/download/0.0.1/gcatlib-0.0.1.tar.gz)
+
 Untar the source files using:
 ```
 tar -xf gcatlib-0.0.1.tar.gz
@@ -48,7 +51,7 @@ the `configure` script should be executed with:
 
 To install `gcatlib` in a non-standard directory use:
 ```
-../configure --prefix installation_path
+../configure --prefix=installation_path
 ```
 
 Append the `CPPFLAGS` and `LDFLAGS` to the above command the dependent
