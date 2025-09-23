@@ -2,7 +2,9 @@
 Gene and Chromosome Analysis Toolkit (gcat) is a C++ library for most
 common tasks associated with genomic data files such as for parsing
 FASTX, SAM/BAM, and GTF files. gcat is conceptually identical to 
-`pysam` and `HTseq`, and borrows ideas from them.
+[`pysam`](https://pysam.readthedocs.io/en/latest/api.html) and 
+[`HTseq`](https://htseq.readthedocs.io/en/latest/), and 
+borrows ideas from them.
 
 ## Installation
 `gcat` is dependent on `HTSlib`. `HTSlib` can be downloaded from
@@ -61,7 +63,7 @@ This will generate the libraries into the `build` directory.
 
 Finally, install gcatlib with:
 ```
-make intall
+make install
 ```
 This will copy all the header files into `installation_path/include` and
 the library files into `installation_path/lib`.
