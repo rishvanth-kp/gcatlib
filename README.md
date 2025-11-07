@@ -45,8 +45,8 @@ system path (typically `/usr/bin` and `/usr/lib`), and to install
 `gcatlib` in a non-standard path:
 
 ```
-../configure --prefix=path_to_install_gcatlib 
-  CPPFLAGS='-I/path_to_htslib/include' 
+../configure --prefix=path_to_install_gcatlib \ 
+  CPPFLAGS='-I/path_to_htslib/include' \
   LDFLAGS='-L/path_to_htslib/lib'
 ```
 
@@ -71,7 +71,7 @@ gcatlib in the standard system path, the `configure` script should be
 executed with:
 
 ```
-../configure CPPFLAGS='-I/path_to_htslib/include' 
+../configure CPPFLAGS='-I/path_to_htslib/include' \ 
   LDFLAGS='-L/path_to_htslib/lib'
 ```
 
