@@ -18,16 +18,16 @@ following the procedure under 'Basic Installation' described
 [here](https://github.com/samtools/htslib/blob/develop/INSTALL)
 
 `gcatlib` can be downloaded [here](
-https://github.com/rishvanth-kp/gcatlib/releases/download/0.0.1/gcatlib-0.0.1.tar.gz)
+https://github.com/rishvanth-kp/gcatlib/releases)
 
 Untar the source files using:
 ```
-tar -xf gcatlib-0.0.1.tar.gz
+tar -xf gcatlib-x.y.z.tar.gz
 ```
 
 Create a build directory with:
 ```
-cd gcatlib-0.0.1
+cd gcatlib-x.y.z
 mkdir build 
 cd build
 ```
