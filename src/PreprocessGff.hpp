@@ -24,6 +24,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <cstdint>
 #include <unordered_map>
 
 #include "GtfReader.hpp"
