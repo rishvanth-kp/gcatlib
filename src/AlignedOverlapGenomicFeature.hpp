@@ -50,6 +50,9 @@ public:
 
   void set_min_frag_len(const size_t min_len);
   void set_max_frag_len(const size_t max_len);
+  
+  void set_shift_left(const int left);
+  void set_shift_right(const int right);
 
   void process_barcodes(const std::string& bc_file);
 
@@ -68,6 +71,9 @@ private:
 
   size_t min_frag_len;
   size_t max_frag_len;
+    
+  int shift_left;
+  int shift_right;
 
   std::vector<size_t> counted_bases;
   std::vector<size_t> counted_frags;

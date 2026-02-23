@@ -39,6 +39,8 @@ AlignedOverlapGenomicFeature::AlignedOverlapGenomicFeature() {
   feature_counter = 0;
   min_frag_len = 0;
   max_frag_len = std::numeric_limits<size_t>::max();
+  shift_left = 4;
+  shift_right = -5;
 }
 
 AlignedOverlapGenomicFeature::~AlignedOverlapGenomicFeature() {
@@ -156,6 +158,18 @@ AlignedOverlapGenomicFeature::set_max_frag_len(const size_t max_len) {
   max_frag_len = max_len;
 }
 
+
+void 
+AlignedOverlapGenomicFeature::set_shift_left(const int left) {
+  shift_left = left;
+}
+
+void 
+AlignedOverlapGenomicFeature::set_shift_right(const int right) {
+  shift_right = right;
+}
+
+
 void
 AlignedOverlapGenomicFeature::process_barcodes(const std::string& bc_file) {
 
@@ -215,6 +229,10 @@ AlignedOverlapGenomicFeature::add(const SamEntry &e1,
     size_t frag_end = e1_end;
     if (e2_end > e1_end)
       frag_end = e2_end;
+
+    // add the ATAC fragment shift
+    frag_start += shift_left;
+    frag_end += shift_right;
 
     size_t frag_len = frag_end - frag_start;
 
