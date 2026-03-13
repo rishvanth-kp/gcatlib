@@ -31,20 +31,79 @@ using std::endl;
 using std::pair;
 using std::vector;
 
+/**
+* \brief A memory-efficient step function over integer positions.
+*
+* StepVector stores a piecewise-constant function over a 1D integer
+* coordinate space. Rather than storing a value at every position,
+* it stores only the positions where the value changes (step boundaries),
+* making it efficient for sparse data.
+*
+* Values are added over half-open intervals [start, end) and are
+* cumulative: adding to an interval that already has a value accumulates
+* the new value on top of the existing one. Positions that have never
+* been written to return the default-constructed value T{}.
+*
+* The type T must support the += and + operators and must be
+* default-constructible.
+*
+* \tparam T The value type stored at each step.
+*/
 template<typename T>
 class StepVector {
 public:
+  /**
+  * Default constructor.
+  */
   StepVector();
 
-  // add element
+  /**
+  * Accumulates val over the half-open interval [start, end).
+  * If the interval overlaps with previously added intervals, the
+  * values are summed. If start >= end, the call is a no-op.
+  *
+  * @param [in] start Start of the interval (inclusive, 0-based).
+  * @param [in] end   End of the interval (exclusive, 0-based).
+  * @param [in] val   Value to accumulate over the interval.
+  */
   void add(const size_t start, const size_t end, const T &val);
-  // access elements in range
+
+  /**
+  * Returns the step boundaries and their values for the half-open
+  * interval [start, end).
+  *
+  * The output is a vector of (position, value) pairs representing
+  * the step function within the queried range. Consecutive entries
+  * out[i] and out[i+1] define the sub-interval [out[i].first,
+  * out[i+1].first) with constant value out[i].second. The first
+  * entry is always (start, value_at_start) and the last entry is
+  * always (end, value_at_end), bounding the output. Any step
+  * boundaries strictly inside (start, end) are included between them.
+  *
+  * If start >= end, out is cleared and left empty.
+  *
+  * @param [in]  start Start of the query interval (inclusive, 0-based).
+  * @param [in]  end   End of the query interval (exclusive, 0-based).
+  * @param [out] out   Vector of (position, value) pairs representing
+  *   the step boundaries within [start, end). Cleared before populating.
+  */
   void at_range(const size_t start, const size_t end,
                 vector<pair<size_t, T>>& out) const;
-  // access value at a location
+
+  /**
+  * Returns the value at a single position.
+  * Returns the default-constructed value T{} if no value has been
+  * accumulated at or before pos.
+  *
+  * @param [in] pos Query position (0-based).
+  * @return The accumulated value at pos.
+  */
   T at(const size_t pos) const;
 
-  // print elements
+  /**
+  * Prints all internal step boundaries to stdout as tab-separated
+  * position-value pairs, one per line. Intended for debugging.
+  */
   void print_elements();
 
 

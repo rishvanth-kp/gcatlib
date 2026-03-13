@@ -30,15 +30,17 @@
 /**
 * \brief BED file reader.
 *
-* A class to read and parse BED files.
+* A class to read and parse BED files. Supports reading BED3 entries
+* (chrom, start, end) and variable-column BED entries where additional
+* columns are returned as a vector of strings.
 */
 class BedReader {
 public:
   /**
-  * Opens a BED file. Thorws a runtime error if the file cannot
+  * Opens a BED file. Throws a runtime error if the file cannot
   * be opened.
   *
-  * @param [in] in_file BED file name
+  * @param [in] in_file BED file name.
   */
   BedReader(const string &in_file);
   /**
@@ -47,8 +49,8 @@ public:
   ~BedReader();
 
   /**
-  * Reads the next BED3 (chrom, start, end) line from the file,
-  * and populates a @see GenomicRegion.
+  * Reads the next BED3 (chrom, start, end) line from the file
+  * and populates a \ref GenomicRegion.
   *
   * @param [out] g GenomicRegion to populate.
   * @return True on successfully reading a BED3 entry. False if
@@ -57,23 +59,24 @@ public:
   bool read_bed3_line(GenomicRegion &g);
 
   /**
-  * Reads a bed line with more than 3 coulums and populates a
-` * @see GenomicRegion with the first 3 columns (chrom, start, end)
-  * and puts the remaining columns in a vector of strings.
+  * Reads the next BED line and populates a \ref GenomicRegion with
+  * the first 3 columns (chrom, start, end). Any remaining columns
+  * are returned in a vector of strings. If the line has only 3
+  * columns, the fields vector will be empty.
   *
-  * @param [out] g GenomicRegion to populate with the required BED fields
-  * @param [out] fields Vector<string> to populate with with the optional
-  *   BED fileds
+  * @param [out] g      GenomicRegion to populate with chrom, start, end.
+  * @param [out] fields Vector of strings containing any additional
+  *   columns beyond the first three.
   * @return True on successfully reading a BED entry. False if end of
   *   file is reached.
   */
   bool read_bed_line(GenomicRegion &g, std::vector<std::string> &fields);
 
   /**
-  * Reads a BED file and pupulates a vector of @see GenomicRegions
-  * with the BED3 (chrom, start, end).
+  * Reads the entire BED file and populates a vector of \ref GenomicRegion
+  * with the BED3 (chrom, start, end) fields.
   *
-  * @param[out] g Vector of GenomicRegions to populate.
+  * @param [out] g Vector of GenomicRegions to populate.
   */
   void read_bed3_file(std::vector<GenomicRegion> &g);
 
