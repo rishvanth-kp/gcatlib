@@ -98,7 +98,23 @@ public:
   */
   ~GtfReader();
 
+  /**
+  * Reads a line from a GTF file, parses it, and populates a @see GtfEntry.
+` * 
+  * @params [out] g GtfEntry to populate.
+  * @return true on successfully reading a gtf entry, and false if end of 
+  *   file is reached. 
+  */
   bool read_gtf_line(GtfEntry &g);
+  /**
+  * Reads a GTF file, parses each line, and populates a vector of 
+  * @see GtfEntry, Note that read_gtf_file and read_gtf_line uses
+  * the same file handler, and so if this is called after calls to
+  * read_gtf_line, then it will read from the next line to the end
+  * of the file. 
+  * 
+  * @param [out] g a vector of @see GtfEntry to populate. 
+  */
   void read_gtf_file(vector<GtfEntry> &g);
 
   bool read_gencode_gtf_line(GencodeGtfEntry &g);
