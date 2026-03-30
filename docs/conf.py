@@ -30,6 +30,8 @@ templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # -- Breathe configuration ---------------------------------------------------
+import os
+
 breathe_projects = {
     "gcatlib": os.path.join(os.path.dirname(__file__), "xml")  
 }
