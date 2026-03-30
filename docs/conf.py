@@ -31,7 +31,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # -- Breathe configuration ---------------------------------------------------
 breathe_projects = {
-    "gcatlib": "./xml"    # path to Doxygen XML output, relative to conf.py
+    "gcatlib": os.path.join(os.path.dirname(__file__), "xml")  
 }
 breathe_default_project = "gcatlib"
 breathe_default_members = ('members', 'undoc-members')
