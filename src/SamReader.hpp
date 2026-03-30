@@ -92,7 +92,7 @@ public:
 
   /**
   * Returns the entire SAM header as a string, including all header
-  * lines (@HD, @SQ, @RG, @PG, etc.).
+  * lines (HD, SQ, RG, PG, etc.).
   *
   * @param [out] hdr String to hold the header.
   */
@@ -110,7 +110,7 @@ private:
 
 /**
 * Parses a SAM header string and extracts reference sequence names
-* and lengths from @SQ header lines. Each sequence is returned as a
+* and lengths from SQ header lines. Each sequence is returned as a
 * \ref GenomicRegion with name set to the sequence name (SN tag) and
 * end set to the sequence length (LN tag).
 *
