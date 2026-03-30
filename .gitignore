@@ -54,6 +54,3 @@ stamp-h1
 
 # vim temp files
 *.swp
-
-# Doxygen files
-Doxyfile
