@@ -40,6 +40,7 @@ autom4te.cache/
 compile
 config.h
 config.h.in
+config.h.in~
 config.log
 config.status
 configure
@@ -47,10 +48,22 @@ configure~
 depcomp
 install-sh
 missing
+stamp-h1
+test-driver
+
+# src build artifacts
 src/.deps/
 src/Makefile
 src/Makefile.in
-stamp-h1
+
+# tests build artifacts
+tests/.deps/
+tests/catch2/.deps/
+tests/catch2/.dirstamp
+tests/test_step_vector
+tests/bench_step_vector
+tests/*.log
+tests/*.trs
 
 # vim temp files
 *.swp
