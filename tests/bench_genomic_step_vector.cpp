@@ -6,7 +6,10 @@
  * Sections:
  *   1. add() — single chromosome (unordered_map dispatch overhead baseline)
  *   2. add() — 1, 5, 20 chromosomes, fixed adds per chromosome
- *   3. at()  — query across 1, 5, 20 chromosomes
+ *   3. add() — 1, 5, 20 chromosomes, random overlapping (extended N)
+ *   4. at()  — query across 1, 5, 20 chromosomes
+ *   5. STRESS: worst-case add() — wide interval over dense pre-built map
+ *   6. STRESS: maximally dense add() — length-1 intervals
  */
 
 #define ANKERL_NANOBENCH_IMPLEMENT
@@ -44,7 +47,7 @@ int main() {
          .unit("add")
          .warmup(3);
 
-    for (int n : {1000, 10000, 100000, 1000000}) {
+    for (int n : {1000, 10000, 100000, 1000000, 10000000}) {
       bench.run("N=" + std::to_string(n), [&] {
         GenomicStepVector<int> gsv;
         for (int i = 0; i < n; ++i)
@@ -107,7 +110,7 @@ int main() {
     for (int n_chrom : {1, 5, 20}) {
       const std::vector<std::string> chroms = make_chrom_names(n_chrom);
 
-      for (int n_per_chrom : {1000, 10000}) {
+      for (int n_per_chrom : {1000, 10000, 100000, 1000000}) {
         // Pre-generate one set of intervals shared across chromosomes.
         std::vector<std::pair<size_t, size_t>> intervals(n_per_chrom);
         for (auto &iv : intervals) {
@@ -176,6 +179,62 @@ int main() {
           gsv.at(q, out);
           nb::doNotOptimizeAway(out);
         }
+      });
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // 5. STRESS: worst-case add() — wide interval over dense pre-built map
+  //
+  // Pre-build a map with N non-overlapping length-1 intervals, creating N
+  // step boundaries. Then benchmark a single add() call spanning the entire
+  // range, which must traverse and update every existing boundary node.
+  // Each benchmark iteration is O(N), clearly showing the update-loop cost.
+  // -------------------------------------------------------------------------
+  {
+    nb::Bench bench;
+    bench.title("GenomicStepVector::add  STRESS worst-case wide interval")
+         .unit("add")
+         .warmup(1);
+
+    for (int n : {10000, 100000, 1000000}) {
+      // Pre-build: N length-1 non-overlapping intervals create N map entries.
+      GenomicStepVector<int> gsv;
+      for (int i = 0; i < n; ++i)
+        gsv.add("chr1",
+                static_cast<size_t>(i) * 2,
+                static_cast<size_t>(i) * 2 + 1, 1);
+
+      const size_t wide_end = static_cast<size_t>(n) * 2;
+      bench.run("N=" + std::to_string(n), [&] {
+        // Each call traverses all N existing map nodes.
+        gsv.add("chr1", 0, wide_end, 1);
+        nb::doNotOptimizeAway(gsv);
+      });
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // 6. STRESS: maximally dense add() — sequential length-1 intervals
+  //
+  // Each add creates a new map entry (no merging possible), so the map
+  // grows to its maximum possible size. Measures performance under peak
+  // memory and cache pressure from a large, dense std::map.
+  // -------------------------------------------------------------------------
+  {
+    nb::Bench bench;
+    bench.title("GenomicStepVector::add  STRESS maximally dense length-1")
+         .unit("add")
+         .warmup(1);
+
+    for (int n : {100000, 1000000}) {
+      bench.run("N=" + std::to_string(n), [&] {
+        GenomicStepVector<int> gsv;
+        for (int i = 0; i < n; ++i)
+          gsv.add("chr1",
+                  static_cast<size_t>(i) * 2,
+                  static_cast<size_t>(i) * 2 + 1, 1);
+        nb::doNotOptimizeAway(gsv);
       });
     }
   }

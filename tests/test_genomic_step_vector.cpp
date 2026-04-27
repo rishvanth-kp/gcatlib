@@ -4,6 +4,8 @@
 
 #include "catch_amalgamated.hpp"
 
+#include <algorithm>
+#include <random>
 #include <string>
 #include <utility>
 #include <vector>
@@ -198,4 +200,116 @@ TEST_CASE("GenomicStepVector: equal-value steps are merged in output") {
   REQUIRE(out.size() == 1);
   REQUIRE(region_eq(out[0].first, GenomicRegion{"chr1", 10, 30}));
   REQUIRE(out[0].second == 3);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_CASE("GenomicStepVector: single-position intervals") {
+  // Minimal-width interval (end = start + 1).
+
+  GenomicStepVector<int> gsv;
+  gsv.add("chr1", 10, 11, 5);
+
+  std::vector<std::pair<GenomicRegion, int>> out;
+  gsv.at(GenomicRegion{"chr1", 0, 20}, out);
+
+  REQUIRE(out.size() == 1);
+  REQUIRE(region_eq(out[0].first, GenomicRegion{"chr1", 10, 11}));
+  REQUIRE(out[0].second == 5);
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_CASE("GenomicStepVector: order independence") {
+  // Adding intervals in two different orders must produce identical results.
+
+  GenomicStepVector<int> gsv1, gsv2;
+
+  gsv1.add("chr1", 10, 30, 1);
+  gsv1.add("chr1", 20, 40, 2);
+  gsv1.add("chr1", 15, 25, 3);
+
+  gsv2.add("chr1", 15, 25, 3);   // reversed order
+  gsv2.add("chr1", 20, 40, 2);
+  gsv2.add("chr1", 10, 30, 1);
+
+  std::vector<std::pair<GenomicRegion, int>> out1, out2;
+  gsv1.at(GenomicRegion{"chr1", 0, 50}, out1);
+  gsv2.at(GenomicRegion{"chr1", 0, 50}, out2);
+
+  REQUIRE(out1.size() == out2.size());
+  for (size_t i = 0; i < out1.size(); ++i) {
+    REQUIRE(region_eq(out1[i].first, out2[i].first));
+    REQUIRE(out1[i].second == out2[i].second);
+  }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_CASE("GenomicStepVector: accumulated value matches interval count") {
+  // Add N random intervals with value=1. For a set of query positions,
+  // verify that at(pos) equals the brute-force count of intervals containing pos.
+
+  const int    N     = 100;
+  const size_t range = 1000;
+
+  std::mt19937 rng(123);
+  std::uniform_int_distribution<size_t> pos_dist(0, range - 1);
+  std::uniform_int_distribution<size_t> len_dist(1, 100);
+
+  struct Interval { size_t start, end; };
+  std::vector<Interval> intervals(N);
+
+  GenomicStepVector<int> gsv;
+  for (auto &iv : intervals) {
+    size_t start = pos_dist(rng);
+    size_t end   = std::min(start + len_dist(rng), range);
+    iv = {start, end};
+    gsv.add("chr1", start, end, 1);
+  }
+
+  const std::vector<size_t> test_positions = {0, 50, 100, 250, 500, 750, 900, 999};
+  std::vector<std::pair<GenomicRegion, int>> out;
+
+  for (size_t pos : test_positions) {
+    int expected = 0;
+    for (const auto &iv : intervals)
+      if (iv.start <= pos && pos < iv.end)
+        ++expected;
+
+    // Query [pos, pos+1) with keep_0=true to always get exactly one entry.
+    gsv.at(GenomicRegion{"chr1", pos, pos + 1}, out, true);
+    REQUIRE(out.size() == 1);
+    REQUIRE(out[0].second == expected);
+  }
+}
+
+// ---------------------------------------------------------------------------
+
+TEST_CASE("GenomicStepVector: cross-chromosome isolation at scale") {
+  // Add the same two overlapping intervals to 20 chromosomes.
+  // Each chromosome must independently return the correct merged output.
+
+  const int n_chrom = 20;
+  GenomicStepVector<int> gsv;
+
+  for (int c = 1; c <= n_chrom; ++c) {
+    std::string chr = "chr" + std::to_string(c);
+    gsv.add(chr, 10, 30, 1);
+    gsv.add(chr, 20, 40, 2);
+  }
+
+  std::vector<std::pair<GenomicRegion, int>> out;
+  for (int c = 1; c <= n_chrom; ++c) {
+    std::string chr = "chr" + std::to_string(c);
+    gsv.at(GenomicRegion{chr, 0, 50}, out);
+
+    REQUIRE(out.size() == 3);
+    REQUIRE(region_eq(out[0].first, GenomicRegion{chr, 10, 20}));
+    REQUIRE(out[0].second == 1);
+    REQUIRE(region_eq(out[1].first, GenomicRegion{chr, 20, 30}));
+    REQUIRE(out[1].second == 3);
+    REQUIRE(region_eq(out[2].first, GenomicRegion{chr, 30, 40}));
+    REQUIRE(out[2].second == 2);
+  }
 }
