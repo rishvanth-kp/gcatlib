@@ -61,7 +61,9 @@ tests/.deps/
 tests/catch2/.deps/
 tests/catch2/.dirstamp
 tests/test_step_vector
+tests/test_genomic_step_vector
 tests/bench_step_vector
+tests/bench_genomic_step_vector
 tests/*.log
 tests/*.trs
 
