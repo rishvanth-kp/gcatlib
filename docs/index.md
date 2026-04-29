@@ -125,11 +125,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
-## API documentation 
+## API documentation
 ```{toctree}
 :maxdepth: 1
 
 api/readers
 api/stepvector
 api/metagene
+```
+
+## Performance
+```{toctree}
+:maxdepth: 1
+
+performance
 ```
