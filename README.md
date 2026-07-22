@@ -6,7 +6,6 @@ FASTX, SAM/BAM, and GTF files. gcat is conceptually identical to
 [`HTseq`](https://htseq.readthedocs.io/en/latest/), and 
 borrows ideas from them.
 
-The documentation for gcatlib will be made available soon. 
 
 ## Installation
 
