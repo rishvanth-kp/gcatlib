@@ -7,9 +7,10 @@
  *   1. add() — single chromosome (unordered_map dispatch overhead baseline)
  *   2. add() — 1, 5, 20 chromosomes, fixed adds per chromosome
  *   3. add() — 1, 5, 20 chromosomes, random overlapping (extended N)
- *   4. at()  — query across 1, 5, 20 chromosomes
- *   5. STRESS: worst-case add() — wide interval over dense pre-built map
- *   6. STRESS: maximally dense add() — length-1 intervals
+ *   4. add() — 1, 5, 20 chromosomes, random, sorted, and overlapping (extended N)
+ *   5. at()  — query across 1, 5, 20 chromosomes
+ *   6. STRESS: worst-case add() — wide interval over dense pre-built map
+ *   7. STRESS: maximally dense add() — length-1 intervals
  */
 
 #define ANKERL_NANOBENCH_IMPLEMENT
@@ -21,6 +22,10 @@
 #include <vector>
 
 #include "GenomicStepVector.hpp"
+
+using std::cout;
+using std::cerr;
+using std::endl;
 
 namespace nb = ankerl::nanobench;
 
@@ -36,7 +41,7 @@ static std::vector<std::string> make_chrom_names(int n) {
 int main() {
 
   // -------------------------------------------------------------------------
-  // 1. add() — single chromosome, sequential non-overlapping
+  // add() — single chromosome, sequential non-overlapping
   //
   // Baseline: measures the cost of the unordered_map chromosome dispatch on
   // top of StepVector::add(). Compare directly with bench_step_vector results.
@@ -48,7 +53,7 @@ int main() {
          .warmup(3);
 
     for (int n : {1000, 10000, 100000, 1000000, 10000000}) {
-      bench.run("N=" + std::to_string(n), [&] {
+      bench.complexityN(n).run("N=" + std::to_string(n), [&] {
         GenomicStepVector<int> gsv;
         for (int i = 0; i < n; ++i)
           gsv.add("chr1",
@@ -57,10 +62,12 @@ int main() {
         nb::doNotOptimizeAway(gsv);
       });
     }
+
+    cout << bench.complexityBigO() << endl;
   }
 
   // -------------------------------------------------------------------------
-  // 2. add() — 1, 5, 20 chromosomes, fixed adds per chromosome
+  // add() — 1, 5, 20 chromosomes, fixed adds per chromosome
   //
   // Each chromosome receives the same number of sequential non-overlapping
   // adds. Measures how the unordered_map scales as chromosome count grows
@@ -78,7 +85,7 @@ int main() {
       for (int n_per_chrom : {1000, 10000, 100000}) {
         const std::string label = "n_chrom=" + std::to_string(n_chrom) +
                                   " n_per_chrom=" + std::to_string(n_per_chrom);
-        bench.run(label, [&] {
+        bench.complexityN(n_chrom * n_per_chrom).run(label, [&] {
           GenomicStepVector<int> gsv;
           for (const auto &chr : chroms)
             for (int i = 0; i < n_per_chrom; ++i)
@@ -89,22 +96,99 @@ int main() {
         });
       }
     }
+
+    cout << bench.complexityBigO() << endl;
   }
 
   // -------------------------------------------------------------------------
-  // 3. add() — 1, 5, 20 chromosomes, random overlapping (pre-generated)
+  // add() — 1 chromosome, random overlapping (pre-generated)
   //
   // Each chromosome receives the same pre-generated random intervals.
   // Measures multi-chromosome performance under realistic overlapping data.
   // -------------------------------------------------------------------------
   {
     nb::Bench bench;
-    bench.title("GenomicStepVector::add  multi-chromosome random overlapping")
+    bench.title("GenomicStepVector::add  single chromosome random overlapping")
          .unit("add")
          .warmup(3);
 
     std::mt19937 rng(42);
-    std::uniform_int_distribution<size_t> pos_dist(0, 100000);
+    std::uniform_int_distribution<size_t> pos_dist(0, 10000000);
+    std::uniform_int_distribution<size_t> len_dist(1, 1000);
+
+    for (int n : {1000, 10000, 100000, 1000000}) {
+      // Pre-generate one set of intervals shared across chromosomes.
+      std::vector<std::pair<size_t, size_t>> intervals(n);
+      for (auto &iv : intervals) {
+        size_t start = pos_dist(rng);
+        iv = {start, start + len_dist(rng)};
+      }
+
+      const std::string label = "N=" + std::to_string(n);
+      bench.complexityN(n).run(label, [&] {
+        GenomicStepVector<int> gsv;
+        for (const auto &iv : intervals)
+          gsv.add("chr1", iv.first, iv.second, 1);
+        nb::doNotOptimizeAway(gsv);
+      });
+    }
+    cout << bench.complexityBigO() << endl;
+  
+  }
+  
+  // -------------------------------------------------------------------------
+  // add() — 1 chromosome, random, sorted, and overlapping (pre-generated)
+  //
+  // Each chromosome receives the same pre-generated random intervals.
+  // Measures multi-chromosome performance under realistic overlapping data.
+  // -------------------------------------------------------------------------
+  {
+    nb::Bench bench;
+    bench.title("GenomicStepVector::add  single chromosome random sorted overlapping")
+         .unit("add")
+         .warmup(3);
+
+    std::mt19937 rng(42);
+    std::uniform_int_distribution<size_t> pos_dist(0, 10000000);
+    std::uniform_int_distribution<size_t> len_dist(1, 1000);
+
+    for (int n : {1000, 10000, 100000, 1000000}) {
+      // Pre-generate one set of intervals shared across chromosomes.
+      std::vector<std::pair<size_t, size_t>> intervals(n);
+      for (auto &iv : intervals) {
+        size_t start = pos_dist(rng);
+        iv = {start, start + len_dist(rng)};
+      }
+        
+      std::sort(intervals.begin(), intervals.end());
+
+      const std::string label = "N=" + std::to_string(n);
+      bench.complexityN(n).run(label, [&] {
+        GenomicStepVector<int> gsv;
+        for (const auto &iv : intervals)
+          gsv.add("chr1", iv.first, iv.second, 1);
+        nb::doNotOptimizeAway(gsv);
+      });
+    }
+    cout << bench.complexityBigO() << endl;
+  
+  }
+  
+  
+  // -------------------------------------------------------------------------
+  // add() — 1, 5, 20 chromosomes, random, sorted, and overlapping (pre-generated)
+  //
+  // Each chromosome receives the same pre-generated random intervals.
+  // Measures multi-chromosome performance under realistic overlapping data.
+  // -------------------------------------------------------------------------
+  {
+    nb::Bench bench;
+    bench.title("GenomicStepVector::add  multi-chromosome random sorted overlapping")
+         .unit("add")
+         .warmup(3);
+
+    std::mt19937 rng(42);
+    std::uniform_int_distribution<size_t> pos_dist(0, 10000000);
     std::uniform_int_distribution<size_t> len_dist(1, 1000);
 
     for (int n_chrom : {1, 5, 20}) {
@@ -118,9 +202,11 @@ int main() {
           iv = {start, start + len_dist(rng)};
         }
 
+        std::sort(intervals.begin(), intervals.end());
+
         const std::string label = "n_chrom=" + std::to_string(n_chrom) +
                                   " n_per_chrom=" + std::to_string(n_per_chrom);
-        bench.run(label, [&] {
+        bench.complexityN(n_chrom * n_per_chrom).run(label, [&] {
           GenomicStepVector<int> gsv;
           for (const auto &chr : chroms)
             for (const auto &iv : intervals)
@@ -129,10 +215,11 @@ int main() {
         });
       }
     }
+    cout << bench.complexityBigO() << endl;
   }
 
   // -------------------------------------------------------------------------
-  // 4. at() — query across 1, 5, 20 chromosomes
+  // at() — query across 1, 5, 20 chromosomes
   //
   // Builds a populated GenomicStepVector, then benchmarks at() queries with
   // pre-generated random (chromosome, region) pairs. Measures chromosome
@@ -184,7 +271,7 @@ int main() {
   }
 
   // -------------------------------------------------------------------------
-  // 5. STRESS: worst-case add() — wide interval over dense pre-built map
+  // STRESS: worst-case add() — wide interval over dense pre-built map
   //
   // Pre-build a map with N non-overlapping length-1 intervals, creating N
   // step boundaries. Then benchmark a single add() call spanning the entire
@@ -215,7 +302,7 @@ int main() {
   }
 
   // -------------------------------------------------------------------------
-  // 6. STRESS: maximally dense add() — sequential length-1 intervals
+  // STRESS: maximally dense add() — sequential length-1 intervals
   //
   // Each add creates a new map entry (no merging possible), so the map
   // grows to its maximum possible size. Measures performance under peak
