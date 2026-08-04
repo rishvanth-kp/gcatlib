@@ -40,6 +40,9 @@ static std::vector<std::string> make_chrom_names(int n) {
 
 int main() {
 
+  // log file
+  std::ofstream log_file("genomic_step_vector_bench.json");
+
   // -------------------------------------------------------------------------
   // add() — single chromosome, sequential non-overlapping
   //
@@ -64,6 +67,7 @@ int main() {
     }
 
     cout << bench.complexityBigO() << endl;
+    bench.render(ankerl::nanobench::templates::json(), log_file);
   }
 
   // -------------------------------------------------------------------------
@@ -98,6 +102,7 @@ int main() {
     }
 
     cout << bench.complexityBigO() << endl;
+    bench.render(ankerl::nanobench::templates::json(), log_file);
   }
 
   // -------------------------------------------------------------------------
@@ -132,8 +137,9 @@ int main() {
         nb::doNotOptimizeAway(gsv);
       });
     }
+    
     cout << bench.complexityBigO() << endl;
-  
+    bench.render(ankerl::nanobench::templates::json(), log_file);
   }
   
   // -------------------------------------------------------------------------
@@ -170,8 +176,9 @@ int main() {
         nb::doNotOptimizeAway(gsv);
       });
     }
+
     cout << bench.complexityBigO() << endl;
-  
+    bench.render(ankerl::nanobench::templates::json(), log_file);  
   }
   
   
@@ -216,6 +223,7 @@ int main() {
       }
     }
     cout << bench.complexityBigO() << endl;
+    bench.render(ankerl::nanobench::templates::json(), log_file);
   }
 
   // -------------------------------------------------------------------------
@@ -325,6 +333,9 @@ int main() {
       });
     }
   }
+
+  // close the log file
+  log_file.close();
 
   return 0;
 }
