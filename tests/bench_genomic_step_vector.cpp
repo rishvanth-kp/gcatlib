@@ -53,6 +53,7 @@ int main() {
     nb::Bench bench;
     bench.title("GenomicStepVector::add  single chromosome sequential")
          .unit("add")
+         .epochs(10)
          .warmup(3);
 
     for (int n : {1000, 10000, 100000, 1000000, 10000000}) {
@@ -82,6 +83,7 @@ int main() {
     nb::Bench bench;
     bench.title("GenomicStepVector::add  multi-chromosome sequential")
          .unit("add")
+         .epochs(10)
          .warmup(3);
 
     for (int n_chrom : {1, 5, 20}) {
@@ -117,6 +119,7 @@ int main() {
     nb::Bench bench;
     bench.title("GenomicStepVector::add  single chromosome random overlapping")
          .unit("add")
+         .epochs(10)
          .warmup(3);
 
     std::mt19937 rng(42);
@@ -154,6 +157,7 @@ int main() {
     nb::Bench bench;
     bench.title("GenomicStepVector::add  single chromosome random sorted overlapping")
          .unit("add")
+         .epochs(10)
          .warmup(3);
 
     std::mt19937 rng(42);
@@ -193,6 +197,7 @@ int main() {
     nb::Bench bench;
     bench.title("GenomicStepVector::add  multi-chromosome random sorted overlapping")
          .unit("add")
+         .epochs(10)
          .warmup(3);
 
     std::mt19937 rng(42);
@@ -244,6 +249,7 @@ int main() {
     nb::Bench bench;
     bench.title("GenomicStepVector::add  multi-chromosome random sorted overlapping 2")
          .unit("add")
+         .epochs(10)
          .warmup(3);
 
     std::mt19937 rng(42);
@@ -296,6 +302,7 @@ int main() {
     nb::Bench bench;
     bench.title("GenomicStepVector::add  multi-chromosome random sorted overlapping")
          .unit("add")
+         .epochs(10)
          .warmup(3);
 
     std::mt19937 rng(42);
@@ -344,6 +351,7 @@ int main() {
     nb::Bench bench;
     bench.title("GenomicStepVector::at single-chromosome unsorted query")
          .unit("query")
+         .epochs(10)
          .warmup(3);
 
     const int n_entries = 1000000;
@@ -399,6 +407,7 @@ int main() {
     nb::Bench bench;
     bench.title("GenomicStepVector::at single-chromosome sorted query")
          .unit("query")
+         .epochs(10)
          .warmup(3);
 
     const int n_entries = 1000000;
@@ -460,6 +469,7 @@ int main() {
     nb::Bench bench;
     bench.title("GenomicStepVector::at single-chromosome varying entries")
          .unit("query")
+         .epochs(10)
          .warmup(3);
 
     const int n_queries = 1000000;
@@ -521,6 +531,7 @@ int main() {
     nb::Bench bench;
     bench.title("GenomicStepVector::at  multi-chromosome query old")
          .unit("query")
+         .epochs(10)
          .warmup(3);
 
     std::mt19937 rng(42);
@@ -577,6 +588,7 @@ int main() {
     nb::Bench bench;
     bench.title("GenomicStepVector::add  STRESS worst-case wide interval")
          .unit("add")
+         .epochs(10)
          .warmup(1);
 
     for (int n : {10000, 100000, 1000000}) {
@@ -607,6 +619,7 @@ int main() {
     nb::Bench bench;
     bench.title("GenomicStepVector::add  STRESS maximally dense length-1")
          .unit("add")
+         .epochs(10)
          .warmup(1);
 
     for (int n : {100000, 1000000}) {
