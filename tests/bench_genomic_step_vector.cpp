@@ -70,6 +70,7 @@ int main() {
     bench.render(ankerl::nanobench::templates::json(), log_file);
   }
 
+/*
   // -------------------------------------------------------------------------
   // add() — 1, 5, 20 chromosomes, fixed adds per chromosome
   //
@@ -86,7 +87,7 @@ int main() {
     for (int n_chrom : {1, 5, 20}) {
       const std::vector<std::string> chroms = make_chrom_names(n_chrom);
 
-      for (int n_per_chrom : {1000, 10000, 100000}) {
+      for (int n_per_chrom : {1000, 10000, 100000, 1000000, 10000000}) {
         const std::string label = "n_chrom=" + std::to_string(n_chrom) +
                                   " n_per_chrom=" + std::to_string(n_per_chrom);
         bench.complexityN(n_chrom * n_per_chrom).run(label, [&] {
@@ -104,6 +105,7 @@ int main() {
     cout << bench.complexityBigO() << endl;
     bench.render(ankerl::nanobench::templates::json(), log_file);
   }
+*/
 
   // -------------------------------------------------------------------------
   // add() — 1 chromosome, random overlapping (pre-generated)
@@ -121,7 +123,7 @@ int main() {
     std::uniform_int_distribution<size_t> pos_dist(0, 10000000);
     std::uniform_int_distribution<size_t> len_dist(1, 1000);
 
-    for (int n : {1000, 10000, 100000, 1000000}) {
+    for (int n : {1000, 10000, 100000, 1000000, 10000000}) {
       // Pre-generate one set of intervals shared across chromosomes.
       std::vector<std::pair<size_t, size_t>> intervals(n);
       for (auto &iv : intervals) {
@@ -158,7 +160,7 @@ int main() {
     std::uniform_int_distribution<size_t> pos_dist(0, 10000000);
     std::uniform_int_distribution<size_t> len_dist(1, 1000);
 
-    for (int n : {1000, 10000, 100000, 1000000}) {
+    for (int n : {1000, 10000, 100000, 1000000, 10000000}) {
       // Pre-generate one set of intervals shared across chromosomes.
       std::vector<std::pair<size_t, size_t>> intervals(n);
       for (auto &iv : intervals) {
@@ -181,7 +183,109 @@ int main() {
     bench.render(ankerl::nanobench::templates::json(), log_file);  
   }
   
+  // -------------------------------------------------------------------------
+  // add() — 1, 5, 10, 20 chromosomes, random, sorted, and overlapping 
+  // (pre-generated)
+  //
+  // Measures multi-chromosome performance under realistic overlapping data.
+  // -------------------------------------------------------------------------
+  {
+    nb::Bench bench;
+    bench.title("GenomicStepVector::add  multi-chromosome random sorted overlapping")
+         .unit("add")
+         .warmup(3);
+
+    std::mt19937 rng(42);
+    std::uniform_int_distribution<size_t> pos_dist(0, 10000000);
+    std::uniform_int_distribution<size_t> len_dist(1, 1000);
+
+    for (int n_chrom : {1, 5, 10, 20}) {
+      const std::vector<std::string> chroms = make_chrom_names(n_chrom);  
+      
+      for (int n : {1000, 10000, 100000, 1000000, 10000000}) {
+        // pre-generate intervels and assign to a random chrom
+        std::uniform_int_distribution<size_t> chrom_dist(0, n_chrom - 1);
+        std::vector<GenomicRegion> intervals;
+        for (int i = 0; i < n; ++i) {
+          size_t start = pos_dist(rng);
+          size_t end = start + len_dist(rng);
+          intervals.push_back(GenomicRegion{chroms[chrom_dist(rng)], start, end});
+        }
+ 
+        // sort the GenomicRanges
+        std::sort(intervals.begin(), intervals.end(), 
+                  [] (const GenomicRegion& a, const GenomicRegion &b) {
+                    return std::tie(a.name, a.start) < std::tie(b.name, b.start);
+                  });
+        
+
+        const std::string label = "n_chrom=" + std::to_string(n_chrom) +
+                                  " n=" + std::to_string(n);
+        bench.complexityN(n).run(label, [&] {
+          GenomicStepVector<int> gsv;
+          for (const auto &iv : intervals)
+            gsv.add(iv, 1);
+          nb::doNotOptimizeAway(gsv);
+        });
+      }
+    }
+
+    cout << bench.complexityBigO() << endl;
+    bench.render(ankerl::nanobench::templates::json(), log_file);  
+  } 
   
+  // -------------------------------------------------------------------------
+  // add() — 1, 5, 10, 20 chromosomes, random, sorted, and overlapping 
+  // (pre-generated)
+  //
+  // Measures multi-chromosome performance under realistic overlapping data.
+  // -------------------------------------------------------------------------
+  {
+    nb::Bench bench;
+    bench.title("GenomicStepVector::add  multi-chromosome random sorted overlapping 2")
+         .unit("add")
+         .warmup(3);
+
+    std::mt19937 rng(42);
+    std::uniform_int_distribution<size_t> pos_dist(0, 10000000);
+    std::uniform_int_distribution<size_t> len_dist(1, 1000);
+
+    for (int n_chrom : {1, 5, 10, 20}) {
+      const std::vector<std::string> chroms = make_chrom_names(n_chrom);  
+      
+      for (int n : {1000, 10000, 100000, 1000000, 10000000}) {
+        // pre-generate intervels and assign to a random chrom
+        std::uniform_int_distribution<size_t> chrom_dist(0, n_chrom - 1);
+        std::vector<GenomicRegion> intervals;
+        for (int i = 0; i < n * n_chrom; ++i) {
+          size_t start = pos_dist(rng);
+          size_t end = start + len_dist(rng);
+          intervals.push_back(GenomicRegion{chroms[chrom_dist(rng)], start, end});
+        }
+ 
+        // sort the GenomicRanges
+        std::sort(intervals.begin(), intervals.end(), 
+                  [] (const GenomicRegion& a, const GenomicRegion &b) {
+                    return std::tie(a.name, a.start) < std::tie(b.name, b.start);
+                  });
+        
+
+        const std::string label = "n_chrom=" + std::to_string(n_chrom) +
+                                  " n_per_chrom=" + std::to_string(n);
+        bench.complexityN(n * n_chrom).run(label, [&] {
+          GenomicStepVector<int> gsv;
+          for (const auto &iv : intervals)
+            gsv.add(iv, 1);
+          nb::doNotOptimizeAway(gsv);
+        });
+      }
+    }
+
+    cout << bench.complexityBigO() << endl;
+    bench.render(ankerl::nanobench::templates::json(), log_file);  
+  } 
+
+/* 
   // -------------------------------------------------------------------------
   // add() — 1, 5, 20 chromosomes, random, sorted, and overlapping (pre-generated)
   //
@@ -225,7 +329,187 @@ int main() {
     cout << bench.complexityBigO() << endl;
     bench.render(ankerl::nanobench::templates::json(), log_file);
   }
+*/
 
+
+
+  // -------------------------------------------------------------------------
+  // at() — single chromosome unsorted query with fixed number of entires. 
+  //
+  // Builds a populated GenomicStepVector, then benchmarks at() queries with
+  // pre-generated unsorted (chromosome, region) pairs. Measures query cost
+  // as the number of queries grow.
+  // -------------------------------------------------------------------------
+  {
+    nb::Bench bench;
+    bench.title("GenomicStepVector::at single-chromosome unsorted query")
+         .unit("query")
+         .warmup(3);
+
+    const int n_entries = 1000000;
+
+    std::mt19937 rng(42);
+    std::uniform_int_distribution<size_t> pos_dist(0, 10000000);
+    std::uniform_int_distribution<size_t> len_dist(1, 1000);
+
+    for (int n : {1000, 10000, 100000, 1000000, 10000000}) {
+      // build the genomic step vector
+      std::vector<std::pair<size_t, size_t>> entries(n_entries);
+      for (auto &e : entries) {
+        size_t start = pos_dist(rng);
+        e = {start, start + len_dist(rng)};
+      }
+      
+      std::sort(entries.begin(), entries.end());
+
+      GenomicStepVector<int> gsv;
+      for(auto &e : entries) {
+        gsv.add("chr1", e.first, e.second, 1);
+      }
+
+      // pre-generate random queries
+      std::vector<GenomicRegion> queries(n); 
+      for (auto &q : queries) {
+        size_t start = pos_dist(rng);
+        q = GenomicRegion{"chr1", start, start + len_dist(rng)};
+      }
+
+      // query the step vector
+      std::vector<std::pair<GenomicRegion, int>> out;
+      const std::string label = "N=" + std::to_string(n);
+      bench.complexityN(n).run(label, [&] {
+        for (const auto &q : queries) {
+          gsv.at(q, out);
+          nb::doNotOptimizeAway(out);
+        }
+      }); 
+    }    
+    cout << bench.complexityBigO() << endl;
+    bench.render(ankerl::nanobench::templates::json(), log_file);
+  }
+  
+  // -------------------------------------------------------------------------
+  // at() — single chromosome sorted query with fixed number of entires. 
+  //
+  // Builds a populated GenomicStepVector, then benchmarks at() queries with
+  // pre-generated unsorted (chromosome, region) pairs. Measures query cost
+  // as the number of queries grow.
+  // -------------------------------------------------------------------------
+  {
+    nb::Bench bench;
+    bench.title("GenomicStepVector::at single-chromosome sorted query")
+         .unit("query")
+         .warmup(3);
+
+    const int n_entries = 1000000;
+
+    std::mt19937 rng(42);
+    std::uniform_int_distribution<size_t> pos_dist(0, 10000000);
+    std::uniform_int_distribution<size_t> len_dist(1, 1000);
+
+    for (int n : {1000, 10000, 100000, 1000000, 10000000}) {
+      // build the genomic step vector
+      std::vector<std::pair<size_t, size_t>> entries(n_entries);
+      for (auto &e : entries) {
+        size_t start = pos_dist(rng);
+        e = {start, start + len_dist(rng)};
+      }
+      
+      std::sort(entries.begin(), entries.end());
+
+      GenomicStepVector<int> gsv;
+      for(auto &e : entries) {
+        gsv.add("chr1", e.first, e.second, 1);
+      }
+
+      // pre-generate random queries
+      std::vector<GenomicRegion> queries(n); 
+      for (auto &q : queries) {
+        size_t start = pos_dist(rng);
+        q = GenomicRegion{"chr1", start, start + len_dist(rng)};
+      }
+
+      std::sort(queries.begin(), queries.end(), 
+                [] (const GenomicRegion& a, const GenomicRegion &b) {
+                  return std::tie(a.name, a.start) < std::tie(b.name, b.start);
+                });
+
+      // query the step vector
+      std::vector<std::pair<GenomicRegion, int>> out;
+      const std::string label = "N=" + std::to_string(n);
+      bench.complexityN(n).run(label, [&] {
+        for (const auto &q : queries) {
+          gsv.at(q, out);
+          nb::doNotOptimizeAway(out);
+        }
+      }); 
+    }    
+    cout << bench.complexityBigO() << endl;
+    bench.render(ankerl::nanobench::templates::json(), log_file);
+  }
+
+  // -------------------------------------------------------------------------
+  // at() — single chromosome varying the number of entries with fixed number 
+  // of queries. 
+  //
+  // Builds a populated GenomicStepVector, then benchmarks at() queries with
+  // pre-generated unsorted (chromosome, region) pairs. Measures query cost
+  // as the number of entries grow.
+  // -------------------------------------------------------------------------
+  {
+    nb::Bench bench;
+    bench.title("GenomicStepVector::at single-chromosome varying entries")
+         .unit("query")
+         .warmup(3);
+
+    const int n_queries = 1000000;
+
+    std::mt19937 rng(42);
+    std::uniform_int_distribution<size_t> pos_dist(0, 10000000);
+    std::uniform_int_distribution<size_t> len_dist(1, 1000);
+
+    for (int n : {1000, 10000, 100000, 1000000, 10000000}) {
+      // build the genomic step vector
+      std::vector<std::pair<size_t, size_t>> entries(n);
+      for (auto &e : entries) {
+        size_t start = pos_dist(rng);
+        e = {start, start + len_dist(rng)};
+      }
+      
+      std::sort(entries.begin(), entries.end());
+
+      GenomicStepVector<int> gsv;
+      for(auto &e : entries) {
+        gsv.add("chr1", e.first, e.second, 1);
+      }
+
+      // pre-generate random queries
+      std::vector<GenomicRegion> queries(n_queries); 
+      for (auto &q : queries) {
+        size_t start = pos_dist(rng);
+        q = GenomicRegion{"chr1", start, start + len_dist(rng)};
+      }
+
+      std::sort(queries.begin(), queries.end(), 
+                [] (const GenomicRegion& a, const GenomicRegion &b) {
+                  return std::tie(a.name, a.start) < std::tie(b.name, b.start);
+                });
+
+      // query the step vector
+      std::vector<std::pair<GenomicRegion, int>> out;
+      const std::string label = "N=" + std::to_string(n);
+      bench.complexityN(n).run(label, [&] {
+        for (const auto &q : queries) {
+          gsv.at(q, out);
+          nb::doNotOptimizeAway(out);
+        }
+      }); 
+    }    
+    cout << bench.complexityBigO() << endl;
+    bench.render(ankerl::nanobench::templates::json(), log_file);
+  }
+
+/*
   // -------------------------------------------------------------------------
   // at() — query across 1, 5, 20 chromosomes
   //
@@ -235,7 +519,7 @@ int main() {
   // -------------------------------------------------------------------------
   {
     nb::Bench bench;
-    bench.title("GenomicStepVector::at  multi-chromosome query")
+    bench.title("GenomicStepVector::at  multi-chromosome query old")
          .unit("query")
          .warmup(3);
 
@@ -277,7 +561,10 @@ int main() {
       });
     }
   }
+*/
 
+
+/*
   // -------------------------------------------------------------------------
   // STRESS: worst-case add() — wide interval over dense pre-built map
   //
@@ -333,7 +620,7 @@ int main() {
       });
     }
   }
-
+*/
   // close the log file
   log_file.close();
 
