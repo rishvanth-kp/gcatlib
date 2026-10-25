@@ -1,5 +1,5 @@
 /*
-* GenomcRegion: class to store genomic intervals
+* GenomicStepVector: chromosome-aware step function for genomic data
 * Copyright (C) 2022 Rishvanth Prabakar
 *
 * This program is free software; you can redistribute it and/or modify
@@ -41,16 +41,17 @@ using std::unordered_map;
 * GenomicStepVector extends \ref StepVector to genomic coordinates by
 * maintaining an independent \ref StepVector per chromosome. Chromosomes
 * are created on demand the first time an interval is added. The
-* accumulation semantics are the same as \ref StepVector: adding to an
-* interval that already has a value sums the new value on top of it.
+* accumulation semantics are the same as in \ref StepVector, so adding to
+* an interval that already has a value sums the new value on top of it.
 *
 * The main query method at(GenomicRegion, out) returns results as a
 * vector of (GenomicRegion, T) pairs where consecutive step boundaries
 * with equal values are merged into a single region, and zero-valued
 * intervals can optionally be filtered out.
 *
-* The type T must support the += and + operators, equality comparison,
-* and must be default-constructible.
+* The type T must support the +, +=, == and != operators, and must be
+* default-constructible. The debugging overload at(chr, start, end)
+* additionally requires operator<< for T, but only if it is called.
 *
 * \tparam T The value type stored at each step.
 */
@@ -66,8 +67,8 @@ public:
   /**
   * Accumulates val over the half-open interval [start, end) on the
   * given chromosome. If the chromosome does not yet exist, it is
-  * created. Accumulation semantics are inherited from \ref StepVector:
-  * overlapping intervals sum their values.
+  * created. Accumulation semantics are inherited from \ref StepVector,
+  * so overlapping intervals sum their values.
   *
   * @param [in] chr   Chromosome name.
   * @param [in] start Start of the interval (inclusive, 0-based).
@@ -101,6 +102,8 @@ public:
   * vector of (GenomicRegion, T) pairs. Each pair represents a contiguous
   * sub-interval where the value is constant. Adjacent step boundaries
   * with the same value are merged into a single entry.
+  * Output regions take their name from g and always have strand '.';
+  * the strand of g is not used.
   *
   * By default (keep_0 = false), intervals where the value equals T{}
   * (the default-constructed zero value) are excluded from the output.
@@ -116,6 +119,9 @@ public:
   *   populating.
   * @param [in]  keep_0 If false (default), intervals with value T{}
   *   are excluded. If true, all intervals are returned.
+  * @warning g.start must be less than g.end. If g.start >= g.end and
+  *   the chromosome exists, the call reads past the end of an internal
+  *   vector (undefined behaviour, typically a crash).
   */
   void at(const GenomicRegion &g,
           vector<pair<GenomicRegion, T>> &out,
@@ -135,6 +141,8 @@ public:
 
   /**
   * Returns the number of distinct chromosomes that have been added.
+  * A chromosome is counted as soon as add() is called on it, even if
+  * that call had start >= end and stored no values.
   *
   * @return Number of chromosomes.
   */
@@ -142,7 +150,8 @@ public:
 
   /**
   * Returns the total number of add() calls made across all chromosomes.
-  * This counts calls, not unique genomic intervals.
+  * This counts calls, not unique genomic intervals, and includes calls
+  * with start >= end that did not change any values.
   *
   * @return Total number of add() calls.
   */

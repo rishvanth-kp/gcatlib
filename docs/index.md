@@ -131,6 +131,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 api/readers
 api/stepvector
 api/metagene
+api/types
+api/analysis
 ```
 
 ## Performance
