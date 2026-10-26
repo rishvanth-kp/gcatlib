@@ -76,10 +76,9 @@
 * agf.feature_count_to_file("counts.txt");  // 4. write the counts
 * \endcode
 *
-* @note The GTF must follow GENCODE conventions: gene types are read
-*   from the gene_type attribute (Ensembl's gene_biotype is not
-*   recognised, so with an Ensembl GTF every base would be counted as
-*   intergenic), and the mitochondrial chromosome must be named chrM.
+* @note Only GENCODE GTF files are supported at the moment. Other GTF
+*   files, such as Ensembl's, can give wrong counts without an error.
+*   The mitochondrial chromosome must be named chrM, as in GENCODE.
 *   No filtering is done: strand is not considered; secondary,
 *   supplementary, duplicate, and low-MAPQ alignments are counted; and
 *   overlapping mates of a pair are both counted. Filter alignments

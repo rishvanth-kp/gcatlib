@@ -84,14 +84,14 @@
 * aogf.feature_counts_to_file("sample");       // 4. write the counts
 * \endcode
 *
-* @note The GTF must follow GENCODE conventions: UTRs must be UTR lines
-*   (Ensembl's five_prime_utr and three_prime_utr lines are not
-*   recognised, so those regions would be labelled intron), and the
-*   mitochondrial chromosome must be named chrM. Counting is per
-*   barcode only; there is no bulk mode, so use a single barcode for
-*   bulk data. No filtering is done: strand is not considered, and
-*   secondary, supplementary, duplicate, and low-MAPQ alignments are
-*   counted. Both reads of a pair must be mapped to the same chromosome.
+* @note Only GENCODE GTF files are supported at the moment. Other GTF
+*   files, such as Ensembl's, can give wrong counts without an error.
+*   The mitochondrial chromosome must be named chrM, as in GENCODE.
+*   Counting is per barcode only; there is no bulk mode, so use a single
+*   barcode for bulk data. No filtering is done: strand is not
+*   considered, and secondary, supplementary, duplicate, and low-MAPQ
+*   alignments are counted. Both reads of a pair must be mapped to the
+*   same chromosome.
 */
 class AlignedOverlapGenomicFeature {
 public:
