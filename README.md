@@ -10,7 +10,7 @@ borrows ideas from them.
 ## Installation
 
 
-##### Preparation
+### Preparation
 `gcat` is dependent on `HTSlib`. `HTSlib` can be downloaded from
 [here](https://www.htslib.org/download/) and can be installed by
 following the procedure under 'Basic Installation' described
@@ -31,7 +31,7 @@ mkdir build
 cd build
 ```
 
-##### Configure
+### Configure
 `gcatlib` is installed using the `autotools` build system.  The first
 step is to run a configuration script to generate the required
 Makefiles. The parameters to `configure` will vary based on where the
@@ -39,18 +39,18 @@ dependent libraries are installed, and where we would like `gcatlib`
 to be installed. 
 
 
-1) The most likely scenario, where `HTSlib` is not in the the standard
-system path (typically `/usr/bin` and `/usr/lib`), and to install
+1) The most likely scenario, where `HTSlib` is not in the standard
+system path (typically `/usr/include` and `/usr/lib`), and to install
 `gcatlib` in a non-standard path:
 
 ```
-../configure --prefix=path_to_install_gcatlib \ 
+../configure --prefix=path_to_install_gcatlib \
   CPPFLAGS='-I/path_to_htslib/include' \
   LDFLAGS='-L/path_to_htslib/lib'
 ```
 
 2) If `HTSlib` is installed in the standard system path (typically
-`/usr/bin` and `/usr/lib`), and if we would like `gcatlib` to be
+`/usr/include` and `/usr/lib`), and if we would like `gcatlib` to be
 installed in the standard system path, use the following: 
 
 ```
@@ -70,7 +70,7 @@ gcatlib in the standard system path, the `configure` script should be
 executed with:
 
 ```
-../configure CPPFLAGS='-I/path_to_htslib/include' \ 
+../configure CPPFLAGS='-I/path_to_htslib/include' \
   LDFLAGS='-L/path_to_htslib/lib'
 ```
 
@@ -82,24 +82,25 @@ autoreconf -i
 ```
 After which the configuration can proceed as usual.
 
-##### Build
+### Build
 
 The configuration is now complete and the build system is ready to
-compile all the programs with:
+compile the library with:
 ```
 make [-j threads]
 ```
-This will generate the libraries into the `build` directory.
+This will build the library, `libgcat.a`, into the `build/src`
+directory.
 
 
-##### Install 
+### Install
 
 Finally, install gcatlib with:
 ```
 make install
 ```
-This will copy all the header files into `installation_path/include` and
-the library files into `installation_path/lib`.
+This will copy the header files into `installation_path/include/gcatlib`
+and the library, `libgcat.a`, into `installation_path/lib`.
 
 
 
