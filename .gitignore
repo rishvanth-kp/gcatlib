@@ -67,5 +67,9 @@ tests/bench_genomic_step_vector
 tests/*.log
 tests/*.trs
 
+# docs build artifacts
+docs/xml/
+docs/_build/
+
 # vim temp files
 *.swp
