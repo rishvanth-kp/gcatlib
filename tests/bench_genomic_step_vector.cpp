@@ -3,14 +3,23 @@
  *
  * Usage: ./bench_genomic_step_vector
  *
+ * Results are printed to stdout and written as JSON to
+ * genomic_step_vector_bench.json.
+ *
  * Sections:
- *   1. add() — single chromosome (unordered_map dispatch overhead baseline)
- *   2. add() — 1, 5, 20 chromosomes, fixed adds per chromosome
- *   3. add() — 1, 5, 20 chromosomes, random overlapping (extended N)
- *   4. add() — 1, 5, 20 chromosomes, random, sorted, and overlapping (extended N)
- *   5. at()  — query across 1, 5, 20 chromosomes
- *   6. STRESS: worst-case add() — wide interval over dense pre-built map
- *   7. STRESS: maximally dense add() — length-1 intervals
+ *   1. add() — single chromosome, sequential non-overlapping
+ *   2. add() — single chromosome, random overlapping
+ *   3. add() — single chromosome, random overlapping, sorted
+ *   4. add() — 1, 5, 10, 20 chromosomes, random overlapping, sorted,
+ *              fixed total number of adds
+ *   5. add() — 1, 5, 10, 20 chromosomes, random overlapping, sorted,
+ *              fixed number of adds per chromosome
+ *   6. at()  — single chromosome, unsorted queries, varying query count
+ *   7. at()  — single chromosome, sorted queries, varying query count
+ *   8. at()  — single chromosome, sorted queries, varying entry count
+ *
+ * Disabled (commented out): multi-chromosome sequential add(),
+ * multi-chromosome at(), and the two STRESS add() benchmarks.
  */
 
 #define ANKERL_NANOBENCH_IMPLEMENT
