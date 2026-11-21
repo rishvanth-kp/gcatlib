@@ -146,6 +146,8 @@ GtfReader::parse_gtf_line(const string &in, GtfEntry &g) {
 
   if (required[7][0] == '.')
     g.frame = std::numeric_limits<size_t>::max();
+  else
+    g.frame = std::stoul(required[7]);
 
 
   // parse attributes, if any

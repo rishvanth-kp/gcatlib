@@ -54,8 +54,8 @@ struct GtfEntry {
                        the smallest positive float, not a negative value). */
   char strand;    /**< Strand (column 7): '+', '-', or '.'. */
   size_t frame;   /**< Frame (column 8). Set to SIZE_MAX if the column is
-                       '.'. Numeric frames (0, 1, 2) are not parsed, so for
-                       CDS lines this field is left unset. */
+                       '.'; otherwise the numeric value (0, 1, or 2
+                       for CDS lines). */
   unordered_map<string, string> attribute; /**< Attributes (column 9),
                        mapping each tag to its value. Values are stored
                        exactly as in the file, including surrounding
@@ -92,9 +92,9 @@ struct GencodeGtfEntry {
   size_t start;   /**< Start position (column 4), 1-based. */
   size_t end;     /**< End position (column 5), 1-based and inclusive. */
   char strand;    /**< Strand (column 7): '+', '-', or '.'. */
-  size_t frame;   /**< Frame (column 8). SIZE_MAX if the column is '.'.
-                       Numeric frames are not parsed, so this is
-                       uninitialized for CDS lines. */
+  size_t frame;   /**< Frame (column 8). SIZE_MAX if the column is '.';
+                       otherwise the numeric value (0, 1, or 2 for CDS
+                       lines). */
 
   //attributes
   string gene_id;         /**< gene_id attribute, without quotes. */
